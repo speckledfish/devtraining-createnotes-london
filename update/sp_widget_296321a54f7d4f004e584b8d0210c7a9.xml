@@ -1,27 +1,46 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<record_update table="sp_widget">
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
     <sp_widget action="INSERT_OR_UPDATE">
+        <category/>
         <client_script><![CDATA[function($rootScope,$scope) {
 	/* widget controller */
 	var c = this;
+	var iAM = "WIDGET: Notes List";
 	// Use a position indicator to know which record to update
 	c.notePos = 0;
 
-	c.selectItem = function(idx) {  
+	c.selectItem = function(position) { 
+		/*
+		So, when I click in the notes list in th <a class=...>
+		the ng-click="c.selectItem($index)" calls this function 
+		and passes the $index ($index is merely the position in the list)
+		*/
 		// Set the position indicator to the index value passed in on select
-		c.notePos = idx;
-		var id = c.data.notes[idx].sys_id;
-		console.log('Note ID: ' + id);
+		c.notePos = position;
+		var id = c.data.notes[position].sys_id;
+		console.log(iAM + ' the sys_id of the selected note is: ' + id);
+		// how do we know what is the selected list item?
+		// when we click in the list, we send the idx and it
+		// stays this idx until we click again
+		console.log(iAM + " we're working on position: [" + position + "] So the position stays: " + c.notePos);
+		console.log(iAM + ' Note ID: ' + id);
 		$rootScope.noteID = id;
 		$rootScope.$emit('selectNote', id);
 	}
   // Subscribe to event.  Set the new title and note values on the 
 	// c.data object
+	
+	// RICK: the 'updateTitle' is passed from Notes Body in the
+	//       $rootScope.$emit('updateTitle', r.data)
+	//       from the Notes Body client script
 	$rootScope.$on('updateTitle', function(event,data) { 
-		console.log("updateTitle event received: " + event);
-		console.log(data);
-		c.data.notes[c.notePos].title = data.title;
-		c.data.notes[c.notePos].note = data.note;
+		console.log(iAM + " updateTitle event received: " + event);
+		console.log(iAM + " " + data);
+		// we're back in this widget after updating an item in the notes body widget
+		// so we should still be in the same notes position from when we first
+		// clicked on the notes list
+		console.log(iAM + " We should be working in the same position-which is: " + c.notePos);
+		c.data.notes[c.notePos].title = data.title; // data.title passed via data above
+		c.data.notes[c.notePos].note = data.note; // data.note passed via data above
 	});
 	
 }
@@ -42,7 +61,11 @@
         <public>false</public>
         <roles/>
         <script><![CDATA[(function() {
+	// RICK: This function loads when the widget loads
 	
+	// data.notes will be used in the HTML template
+	// where the ng-repeat in the <a class=""...> element
+	// cycles through the data.notes object
 	data.notes = [];
 	var noteGR = new GlideRecord('x_snc_createnotes_note');
 	noteGR.addQuery('user', gs.getUser().getID());
@@ -63,14 +86,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2017-10-14 01:08:53</sys_created_on>
         <sys_id>296321a54f7d4f004e584b8d0210c7a9</sys_id>
-        <sys_mod_count>15</sys_mod_count>
+        <sys_mod_count>25</sys_mod_count>
         <sys_name>Notes List</sys_name>
         <sys_package display_value="CreateNotes" source="x_snc_createnotes">df5fd9a5090232007f44e1046c8ff69f</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreateNotes">df5fd9a5090232007f44e1046c8ff69f</sys_scope>
         <sys_update_name>sp_widget_296321a54f7d4f004e584b8d0210c7a9</sys_update_name>
-        <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2017-11-15 18:15:41</sys_updated_on>
+        <sys_updated_by>rickforristall</sys_updated_by>
+        <sys_updated_on>2019-04-23 15:32:58</sys_updated_on>
         <template><![CDATA[<div class="panel panel-default">
   <div class="panel-heading clearfix">
     <h3 class="panel-title pull-left">

@@ -1,11 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<record_update table="sp_widget">
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
     <sp_widget action="INSERT_OR_UPDATE">
+        <category/>
         <client_script><![CDATA[function($scope,$rootScope) {
 	/* widget controller */
 	var c = this;
 
+	// $on() is waiting for a $emit() from another client
+	// script in any widget that's on this page
+	// in this case the $on() is waiting for the event titled
+	// 'selectNote' to be invoked
+	// see the Notes List client script to see how
+	// the $emit() is invoked
 	$rootScope.$on('selectNote', function(event,data) {
+		// c.server.get is a call to this widget's 
+		// server script and whatever is sent in the object {}
+		// is received in the server script as "input"
 		c.server.get({
 			action: 'getNote',
 			noteID: $rootScope.noteID
@@ -17,13 +26,22 @@
 	});
 
 	c.updateNote = function(updateType) {
+		// sends a call to the server script
+		// with the c.server.get()
 		c.server.get({
 			action: 'updateNote',
 			noteID: c.data.noteID,
 			noteBody: c.data.note,
 			noteTitle: c.data.title
+			// after the return from the c.server.get call
+			// run the .then function
 		}).then(function(r) {
 			// When the promise is returned, emit the change
+			// this $emit() is available to any sibling widget
+			// client script on this page
+			// passes the function - updateTitle and data as r.data
+			// r is passed back from this widget's server script
+			// in the data.title and data.note object
 			if (updateType == 'title' || updateType == 'body') { 
 				$rootScope.$emit('updateTitle', r.data); 
 			}
@@ -54,11 +72,18 @@
         <roles/>
         <script><![CDATA[(function() {
 
+	// input is passed from this widget's client script
+	// in the form of the c.server.get({object})
+	// so available is:
+	// input.action; input.noteID
 	if (input && input.noteID) {
 		var note = new GlideRecord('x_snc_createnotes_note');
 		if (note.get(input.noteID)) {
 			if (input.action == 'getNote') {
 						data.note = {};
+				    // getRecordValues() simply gets the record's values
+				    // from the GlideRecord call above
+				    // and populates a data.note object
 						$sp.getRecordValues(data.note, note, "title, note, sys_id");
 			}
 			else if (input.action == 'updateNote') { 
@@ -79,14 +104,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2017-10-14 01:17:32</sys_created_on>
         <sys_id>d06529694f7d4f004e584b8d0210c7b7</sys_id>
-        <sys_mod_count>24</sys_mod_count>
+        <sys_mod_count>25</sys_mod_count>
         <sys_name>Notes Body</sys_name>
         <sys_package display_value="CreateNotes" source="x_snc_createnotes">df5fd9a5090232007f44e1046c8ff69f</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreateNotes">df5fd9a5090232007f44e1046c8ff69f</sys_scope>
         <sys_update_name>sp_widget_d06529694f7d4f004e584b8d0210c7b7</sys_update_name>
-        <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2017-11-15 18:19:31</sys_updated_on>
+        <sys_updated_by>rickforristall</sys_updated_by>
+        <sys_updated_on>2019-04-23 15:24:02</sys_updated_on>
         <template><![CDATA[	<div class="panel panel-default" ng-show="c.data.noteID">
 	  <div class="panel-heading clearfix">
 	    <div class="row">
